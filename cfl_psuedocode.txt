@@ -1,0 +1,64 @@
+Expense Item Record Fields
+ * Product name
+ * Brand name
+ * Price per unit of item
+ * Packaging size
+ * Unit of measurement(for the packaging size)
+ * Quantity
+ * Tag
+ * Remarks
+
+
+Expense Item Insertion Psuedo Code
+
+ 1.) Get the ID of the product from the 'product' table.
+     - If none was found insert this product into the table
+       and get its ID.
+ 2.) Get the ID of the tags from the 'tag' table.
+     - If none was found insert the tags into the 'tag' table
+       and get the IDs.
+ 3.) Check if the tags are matched with the product in the 'product_tags'
+       intermediary table. Add an entry if not found.
+ 4.) Get the ID of the brand from the 'brand' table.
+     - If none was found insert the brand into the table
+       and get its ID.
+ 5.) Get the ID for the unit of measurement in the 'unit' table.
+     - If none was found insert the unit of measurement into the 
+       table and get its ID.
+ 6.) Get the ID for the packaging size with the corresponding unit
+       of measurement in the 'product_size' table.
+     - If none was found insert the packaging size with the 
+       corresponding unit of measurement into the table
+       and get its ID.
+ 7.) Get the ID for the product variant with the corresponding
+       product ID, brand ID, and product size ID in the
+       'product_variant_' table.
+     - If none was found add an entry for it and get its ID.
+ 8.) Get the ID and latest price for this product variant in the
+       'item' table. If the price is different add a new entry with it's
+       current price for this product variant and get its ID.
+ 9.) Add new entry with the given item ID, quantity, and remarks if 
+       there is any.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

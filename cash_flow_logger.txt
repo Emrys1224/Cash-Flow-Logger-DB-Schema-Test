@@ -1,0 +1,158 @@
+
+~~~~~~~~~~~~~~~~~~ CASHFLOW LOGGER DATABASE SCHEMA ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+-- INCOME RECORD
+
+> Income source table
+CREATE TABLE source(
+  -- Source of income(e.g. commission, royalties, salary)
+  id   INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  name TEXT    NOT NULL UNIQUE COLLATE NOCASE);
+
+> Source table trigger
+  - Prevent deletion of an entry if it is referenced in income table
+
+> Income record table
+CREATE TABLE income( 
+  -- Income record
+  datetime  DATETIME DEFAULT CURRENT_TIMESTAMP  PRIMARY KEY,
+  source_id INTEGER  NOT NULL,
+  amount    FLOAT    NOT NULL,
+  FOREIGN KEY(source_id) REFERENCES source(id));
+
+> Income view
+
+
+-- Income logging psuedo code
+  1> Get the income source and amount from input.
+  2> Check if the income source is in the "source" table; add it if not.
+  3> Get the id of the income source.
+  4> Add entry to the "income" table with the above source id and amount.
+
+---------------------------------------------------------------------------
+
+-- EXPENSES RECORD
+
+> Product look-up table
+CREATE TABLE product(
+  -- Look_up table of product name/type(e.g. salt, shirt, internet)
+  id   INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  name TEXT    NOT NULL UNIQUE COLLATE NOCASE);
+
+> Product table trigger
+  - Prevent deletion of an entry if it is referenced in product_tags table
+
+> Tags look-up table
+CREATE TABLE tag(
+  -- Look-up table of tags/categories of products as specified by the user.
+  -- This will be used for searching a particular category of items for
+  -- price comparison or analyzing the expense patern for that category.
+  id   INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  name TEXT    NOT NULL UNIQUE COLLATE NOCASE);
+
+> Tag table trigger
+  - Prevent deletion of an entry if it is referenced in product_tags table
+
+> Products and tags intermediary table
+CREATE TABLE product_tags(
+  -- Intermediary table for products and tags since a product can have
+  -- multiple tags.
+  product_id INTEGER NOT NULL,
+  tag_id     INTEGER NOT NULL,
+  FOREIGN KEY(product_id) REFERENCES product(id),
+  FOREIGN KEY(tag_id)     REFERENCES tag(id),
+  PRIMARY KEY(product_id, tag_id));
+
+> Brands look-up table
+CREATE TABLE brand(
+  -- Look-up table for product brands
+  id   INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  name TEXT    NOT NULL UNIQUE COLLATE NOCASE);
+
+> Brands table trigger
+  - Prevent deletion of an entry if it is referenced in 
+  - product_variations table.
+
+> Units look-up table
+CREATE TABLE unit(
+  -- Look-up table for unit of measurement
+  id   INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  name TEXT    NOT NULL UNIQUE COLLATE NOCASE);
+
+> Units table trigger
+  - Prevent deletion of an entry if it is referenced in product_size table.
+
+> Product sizes look-up table
+CREATE TABLE product_size(
+ -- Look-up table of packaging/serving size of products
+ id      INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+ size    FLOAT   NOT NULL,
+ unit_id INTEGER NOT NULL,
+ FOREIGN KEY(unit_id) REFERENCES unit(id),
+ CONSTRAINT package_size UNIQUE(size, unit_id));
+
+> Product sizes table trigger
+  - Prevent deletion of an entry if it is referenced in product_size table.
+
+> Product variants table
+CREATE TABLE product_variant(
+  -- List of product for each brand and package size
+  id              INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  product_id      INTEGER NOT NULL,
+  brand_id        INTEGER NOT NULL,
+  product_size_id INTEGER NOT NULL,
+  FOREIGN KEY(product_id)      REFERENCES product(id),
+  FOREIGN KEY(brand_id)        REFERENCES brand(id),
+  FOREIGN KEY(product_size_id) REFERENCES product_size(id),
+  CONSTRAINT product_variants
+    UNIQUE(product_id, brand_id, product_size_id));
+
+> Product variants table trigger
+  - Prevent deletion of an entry if it is referenced in item table.
+
+> Items table
+CREATE TABLE item(
+  -- Purchased item defined as the combination of a particular product and
+  -- its price at a certain date. It will serve as a record of the change
+  -- in price over time of a product.
+  id                 INTEGER  NOT NULL PRIMARY KEY AUTOINCREMENT,
+  date               DATE     DEFAULT CURRENT_DATE,
+  product_variant_id INTEGER  NOT NULL,
+  price              FLOAT    NOT NULL,
+  FOREIGN KEY(product_variant_id) REFERENCES product_variant(id));
+
+> Items table trigger
+  - Skips insertion of an entry if the last entry of a certain product
+    has the same price.
+  - Prevent deletion of an entry if it is referenced in expence table.
+
+> Expenses record table
+CREATE TABLE expense(
+  -- Expences record
+  datetime DATETIME DEFAULT CURRENT_TIMESTAMP PRIMARY KEY,
+  item_id  INTEGER NOT NULL,
+  quantity FLOAT   NOT NULL,
+  remarks  TEXT,
+  FOREIGN KEY(item_id) REFERENCES item(id));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
